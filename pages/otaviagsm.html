@@ -1,0 +1,651 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+	<title>otaviagsm</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+	<link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+
+<body>
+
+	<!-- Main -->
+	<div class="container">
+
+		<!-- content -->
+		<section class="portfolio">
+
+			<h2>Enabling ESP32 OTA Updates via GSM: Enhancing Device Maintenance and Flexibility</h2>
+
+			<img src="images/Esp32OTAupdate.svg" alt="" />
+
+			<p>In the rapidly evolving landscape of IoT (Internet of Things) devices, the ability to remotely
+				update firmware is crucial for maintaining security, fixing bugs, and introducing new features
+				without physical access to the device. While Over-The-Air (OTA) updates are commonplace,
+				implementing them via GSM (Global System for Mobile Communications) networks adds a new layer of
+				flexibility, particularly in remote or mobile deployments where Wi-Fi connectivity may be
+				unreliable or unavailable.</p>
+
+			<p>In this article, we delve into the realm of ESP32 microcontrollers, renowned for their
+				versatility in IoT applications, and explore how OTA updates can be seamlessly integrated with
+				GSM connectivity. By harnessing the power of GSM networks, ESP32 devices can stay connected and
+				receive firmware updates regardless of their physical location, unlocking a myriad of
+				possibilities for streamlined device maintenance and management. Let's embark on a journey to
+				understand the intricacies of ESP32 OTA updates via GSM and discover the transformative impact
+				it can have on IoT deployments.</p>
+
+			<!-- Lists -->
+			<h3>Project Requirements : </h3>
+			<ul>
+				<li>ESP32 DevKitv1 Module.</li>
+			</ul>
+
+			<!-- Text stuff -->
+			<h3>Over-The-Air (OTA) Overview by Last Minute Engineer</h3>
+			<p>Before delving into exploration or experimentation with new concepts, let's first review some
+				examples provided by the Last Minute Engineer, starting with <a
+					href="https://lastminuteengineers.com/esp32-ota-updates-arduino-ide/">ESP32 Basic Over-The-Air
+					(OTA)</a> sketch.</p>
+
+			<!-- Preformatted Code -->
+			<br>
+			<h4>code: Basic OTA Updater</h4>
+			<pre><code>
+#include &lt;WiFi.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;WiFiUdp.h&gt;
+#include &lt;ArduinoOTA.h&gt;
+
+
+const char* ssid = "..........";
+const char* password = "..........";
+
+void setup() {
+	Serial.begin(115200);
+	Serial.println("Booting");
+	WiFi.mode(WIFI_STA);
+	WiFi.begin(ssid, password);
+	while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+	Serial.println("Connection Failed! Rebooting...");
+	delay(5000);
+	ESP.restart();
+	}
+
+	// Port defaults to 3232
+	// ArduinoOTA.setPort(3232);
+
+	// Hostname defaults to esp3232-[MAC]
+	// ArduinoOTA.setHostname("myesp32");
+
+	// No authentication by default
+	// ArduinoOTA.setPassword("admin");
+
+	// Password can be set with it's md5 value as well
+	// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+	// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+	ArduinoOTA
+	.onStart([]() {
+		String type;
+		if (ArduinoOTA.getCommand() == U_FLASH)
+		type = "sketch";
+		else // U_SPIFFS
+		type = "filesystem";
+
+		// NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+		Serial.println("Start updating " + type);
+	})
+	.onEnd([]() {
+		Serial.println("\nEnd");
+	})
+	.onProgress([](unsigned int progress, unsigned int total) {
+		Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+	})
+	.onError([](ota_error_t error) {
+		Serial.printf("Error[%u]: ", error);
+		if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+		else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+		else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+		else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+		else if (error == OTA_END_ERROR) Serial.println("End Failed");
+	});
+
+	ArduinoOTA.begin();
+
+	Serial.println("Ready");
+	Serial.print("IP address: ");
+	Serial.println(WiFi.localIP());
+}
+
+void loop() {
+	ArduinoOTA.handle();
+}
+</code></pre>
+			<!-- Preformatted Code -->
+			<br>
+			<h4>code: Basic OTA Blink Update</h4>
+			<pre><code>
+
+#include &lt;WiFi.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;WiFiUdp.h&gt;
+#include &lt;ArduinoOTA.h&gt;
+
+const char* ssid = "..........";
+const char* password = "..........";
+
+//variabls for blinking an LED with Millis
+const int led = 2; // ESP32 Pin to which onboard LED is connected
+unsigned long previousMillis = 0;  // will store last time LED was updated
+const long interval = 1000;  // interval at which to blink (milliseconds)
+int ledState = LOW;  // ledState used to set the LED
+void setup() {
+
+pinMode(led, OUTPUT);  
+Serial.begin(115200);
+Serial.println("Booting");
+WiFi.mode(WIFI_STA);
+WiFi.begin(ssid, password);
+while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+Serial.println("Connection Failed! Rebooting...");
+delay(5000);
+ESP.restart();
+}
+
+// Port defaults to 3232
+// ArduinoOTA.setPort(3232);
+
+// Hostname defaults to esp3232-[MAC]
+// ArduinoOTA.setHostname("myesp32");
+
+// No authentication by default
+// ArduinoOTA.setPassword("admin");
+
+// Password can be set with it's md5 value as well
+// MD5(admin) = 21232f297a57a5a743894a0e4a801fc3
+// ArduinoOTA.setPasswordHash("21232f297a57a5a743894a0e4a801fc3");
+
+ArduinoOTA
+.onStart([]() {
+String type;
+if (ArduinoOTA.getCommand() == U_FLASH)
+type = "sketch";
+else // U_SPIFFS
+type = "filesystem";
+
+// NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+Serial.println("Start updating " + type);
+})
+.onEnd([]() {
+Serial.println("\nEnd");
+})
+.onProgress([](unsigned int progress, unsigned int total) {
+Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+})
+.onError([](ota_error_t error) {
+Serial.printf("Error[%u]: ", error);
+if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+else if (error == OTA_END_ERROR) Serial.println("End Failed");
+});
+
+ArduinoOTA.begin();
+
+Serial.println("Ready");
+Serial.print("IP address: ");
+Serial.println(WiFi.localIP());
+}
+
+void loop() {
+ArduinoOTA.handle();  
+//loop to blink without delay
+unsigned long currentMillis = millis();
+if (currentMillis - previousMillis &gt;= interval) {
+// save the last time you blinked the LED
+previousMillis = currentMillis;
+// if the LED is off turn it on and vice-versa:
+ledState = not(ledState);
+// set the LED with the ledState of the variable:
+digitalWrite(led,  ledState);
+}
+}
+</code></pre>
+
+			<p>Next with <a href="https://lastminuteengineers.com/esp32-ota-web-updater-arduino-ide/">ESP32 Web
+					Updater Over The Air (OTA)</a></p>
+
+			<!-- Preformatted Code -->
+			<br>
+			<h4>code: OTA Web Updater</h4>
+			<pre><code>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiClient.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;Update.h&gt;
+
+const char* host = "esp32";
+const char* ssid = "---";
+const char* password = "----";
+
+WebServer server(80);
+
+/* Style */
+String style =
+"&lt;style&gt;#file-input,input{width:100%;height:44px;border-radius:4px;margin:10px auto;font-size:15px}"
+"input{background:#f1f1f1;border:0;padding:0 15px}body{background:#3498db;font-family:sans-serif;font-size:14px;color:#777}"
+"#file-input{padding:0;border:1px solid #ddd;line-height:44px;text-align:left;display:block;cursor:pointer}"
+"#bar,#prgbar{background-color:#f1f1f1;border-radius:10px}#bar{background-color:#3498db;width:0%;height:10px}"
+"form{background:#fff;max-width:258px;margin:75px auto;padding:30px;border-radius:5px;text-align:center}"
+".btn{background:#3498db;color:#fff;cursor:pointer}&lt;/style&gt;";
+
+/* Login page */
+String loginIndex = 
+"&lt;form name=loginForm&gt;"
+"&lt;h1&gt;ESP32 Login&lt;/h1&gt;"
+"&lt;input name=userid placeholder='User ID'&gt; "
+"&lt;input name=pwd placeholder=Password type=Password&gt; "
+"&lt;input type=submit onclick=check(this.form) class=btn value=Login&gt;&lt;/form&gt;"
+"&lt;script&gt;"
+"function check(form) {"
+"if(form.userid.value=='admin' && form.pwd.value=='admin')"
+"{window.open('/serverIndex')}"
+"else"
+"{alert('Error Password or Username')}"
+"}"
+"&lt;/script&gt;" + style;
+
+/* Server Index Page */
+String serverIndex = 
+"&lt;script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'&gt;&lt;/script&gt;"
+"&lt;form method='POST' action='#' enctype='multipart/form-data' id='upload_form'&gt;"
+"&lt;input type='file' name='update' id='file' onchange='sub(this)' style=display:none&gt;"
+"&lt;label id='file-input' for='file'&gt;   Choose file...&lt;/label&gt;"
+"&lt;input type='submit' class=btn value='Update'&gt;"
+"&lt;br&gt;&lt;br&gt;"
+"&lt;div id='prg'&gt;&lt;/div&gt;"
+"&lt;br&gt;&lt;div id='prgbar'&gt;&lt;div id='bar'&gt;&lt;/div&gt;&lt;/div&gt;&lt;br&gt;&lt;/form&gt;"
+"&lt;script&gt;"
+"function sub(obj){"
+"var fileName = obj.value.split('\\\\');"
+"document.getElementById('file-input').innerHTML = '   '+ fileName[fileName.length-1];"
+"};"
+"$('form').submit(function(e){"
+"e.preventDefault();"
+"var form = $('#upload_form')[0];"
+"var data = new FormData(form);"
+"$.ajax({"
+"url: '/update',"
+"type: 'POST',"
+"data: data,"
+"contentType: false,"
+"processData:false,"
+"xhr: function() {"
+"var xhr = new window.XMLHttpRequest();"
+"xhr.upload.addEventListener('progress', function(evt) {"
+"if (evt.lengthComputable) {"
+"var per = evt.loaded / evt.total;"
+"$('#prg').html('progress: ' + Math.round(per*100) + '%');"
+"$('#bar').css('width',Math.round(per*100) + '%');"
+"}"
+"}, false);"
+"return xhr;"
+"},"
+"success:function(d, s) {"
+"console.log('success!') "
+"},"
+"error: function (a, b, c) {"
+"}"
+"});"
+"});"
+"&lt;/script&gt;" + style;
+
+/* setup function */
+void setup(void) {
+Serial.begin(115200);
+
+// Connect to WiFi network
+WiFi.begin(ssid, password);
+Serial.println("");
+
+// Wait for connection
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println("");
+Serial.print("Connected to ");
+Serial.println(ssid);
+Serial.print("IP address: ");
+Serial.println(WiFi.localIP());
+
+/*use mdns for host name resolution*/
+if (!MDNS.begin(host)) { //http://esp32.local
+Serial.println("Error setting up MDNS responder!");
+while (1) {
+delay(1000);
+}
+}
+Serial.println("mDNS responder started");
+/*return index page which is stored in serverIndex */
+server.on("/", HTTP_GET, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/html", loginIndex);
+});
+server.on("/serverIndex", HTTP_GET, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/html", serverIndex);
+});
+/*handling uploading firmware file */
+server.on("/update", HTTP_POST, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+ESP.restart();
+}, []() {
+HTTPUpload& upload = server.upload();
+if (upload.status == UPLOAD_FILE_START) {
+Serial.printf("Update: %s\n", upload.filename.c_str());
+if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+Update.printError(Serial);
+}
+} else if (upload.status == UPLOAD_FILE_WRITE) {
+/* flashing firmware to ESP*/
+if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+Update.printError(Serial);
+}
+} else if (upload.status == UPLOAD_FILE_END) {
+if (Update.end(true)) { //true to set the size to the current progress
+Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+} else {
+Update.printError(Serial);
+}
+}
+});
+server.begin();
+}
+
+void loop(void) {
+server.handleClient();
+delay(1);
+}
+</code></pre>
+
+			<!-- Preformatted Code -->
+			<br>
+			<h4>code: OTA Web Blink Update</h4>
+			<pre><code>
+#include &lt;WiFi.h&gt;
+#include &lt;WiFiClient.h&gt;
+#include &lt;WebServer.h&gt;
+#include &lt;ESPmDNS.h&gt;
+#include &lt;Update.h&gt;
+
+const char* host = "esp32";
+const char* ssid = "---";
+const char* password = "----";
+
+//variabls for blinking an LED with Millis
+const int led = 2; // ESP32 Pin to which onboard LED is connected
+unsigned long previousMillis = 0;  // will store last time LED was updated
+const long interval = 1000;  // interval at which to blink (milliseconds)
+int ledState = LOW;  // ledState used to set the LED
+WebServer server(80);
+
+/* Style */
+String style =
+"&lt;style&gt;#file-input,input{width:100%;height:44px;border-radius:4px;margin:10px auto;font-size:15px}"
+"input{background:#f1f1f1;border:0;padding:0 15px}body{background:#3498db;font-family:sans-serif;font-size:14px;color:#777}"
+"#file-input{padding:0;border:1px solid #ddd;line-height:44px;text-align:left;display:block;cursor:pointer}"
+"#bar,#prgbar{background-color:#f1f1f1;border-radius:10px}#bar{background-color:#3498db;width:0%;height:10px}"
+"form{background:#fff;max-width:258px;margin:75px auto;padding:30px;border-radius:5px;text-align:center}"
+".btn{background:#3498db;color:#fff;cursor:pointer}&lt;/style&gt;";
+
+/* Login page */
+String loginIndex = 
+"&lt;form name=loginForm&gt;"
+"&lt;h1&gt;ESP32 Login&lt;/h1&gt;"
+"&lt;input name=userid placeholder='User ID'&gt; "
+"&lt;input name=pwd placeholder=Password type=Password&gt; "
+"&lt;input type=submit onclick=check(this.form) class=btn value=Login&gt;&lt;/form&gt;"
+"&lt;script&gt;"
+"function check(form) {"
+"if(form.userid.value=='admin' && form.pwd.value=='admin')"
+"{window.open('/serverIndex')}"
+"else"
+"{alert('Error Password or Username')}"
+"}"
+"&lt;/script&gt;" + style;
+
+/* Server Index Page */
+String serverIndex = 
+"&lt;script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'&gt;&lt;/script&gt;"
+"&lt;form method='POST' action='#' enctype='multipart/form-data' id='upload_form'&gt;"
+"&lt;input type='file' name='update' id='file' onchange='sub(this)' style=display:none&gt;"
+"&lt;label id='file-input' for='file'&gt;   Choose file...&lt;/label&gt;"
+"&lt;input type='submit' class=btn value='Update'&gt;"
+"&lt;br&gt;&lt;br&gt;"
+"&lt;div id='prg'&gt;&lt;/div&gt;"
+"&lt;br&gt;&lt;div id='prgbar'&gt;&lt;div id='bar'&gt;&lt;/div&gt;&lt;/div&gt;&lt;br&gt;&lt;/form&gt;"
+"&lt;script&gt;"
+"function sub(obj){"
+"var fileName = obj.value.split('\\\\');"
+"document.getElementById('file-input').innerHTML = '   '+ fileName[fileName.length-1];"
+"};"
+"$('form').submit(function(e){"
+"e.preventDefault();"
+"var form = $('#upload_form')[0];"
+"var data = new FormData(form);"
+"$.ajax({"
+"url: '/update',"
+"type: 'POST',"
+"data: data,"
+"contentType: false,"
+"processData:false,"
+"xhr: function() {"
+"var xhr = new window.XMLHttpRequest();"
+"xhr.upload.addEventListener('progress', function(evt) {"
+"if (evt.lengthComputable) {"
+"var per = evt.loaded / evt.total;"
+"$('#prg').html('progress: ' + Math.round(per*100) + '%');"
+"$('#bar').css('width',Math.round(per*100) + '%');"
+"}"
+"}, false);"
+"return xhr;"
+"},"
+"success:function(d, s) {"
+"console.log('success!') "
+"},"
+"error: function (a, b, c) {"
+"}"
+"});"
+"});"
+"&lt;/script&gt;" + style;
+
+/* setup function */
+void setup(void) {
+
+pinMode(led,  OUTPUT);
+Serial.begin(115200);
+
+// Connect to WiFi network
+WiFi.begin(ssid, password);
+Serial.println("");
+
+// Wait for connection
+while (WiFi.status() != WL_CONNECTED) {
+delay(500);
+Serial.print(".");
+}
+Serial.println("");
+Serial.print("Connected to ");
+Serial.println(ssid);
+Serial.print("IP address: ");
+Serial.println(WiFi.localIP());
+
+/*use mdns for host name resolution*/
+if (!MDNS.begin(host)) { //http://esp32.local
+Serial.println("Error setting up MDNS responder!");
+while (1) {
+delay(1000);
+}
+}
+Serial.println("mDNS responder started");
+/*return index page which is stored in serverIndex */
+server.on("/", HTTP_GET, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/html", loginIndex);
+});
+server.on("/serverIndex", HTTP_GET, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/html", serverIndex);
+});
+/*handling uploading firmware file */
+server.on("/update", HTTP_POST, []() {
+server.sendHeader("Connection", "close");
+server.send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+ESP.restart();
+}, []() {
+HTTPUpload& upload = server.upload();
+if (upload.status == UPLOAD_FILE_START) {
+Serial.printf("Update: %s\n", upload.filename.c_str());
+if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
+Update.printError(Serial);
+}
+} else if (upload.status == UPLOAD_FILE_WRITE) {
+/* flashing firmware to ESP*/
+if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+Update.printError(Serial);
+}
+} else if (upload.status == UPLOAD_FILE_END) {
+if (Update.end(true)) { //true to set the size to the current progress
+Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
+} else {
+Update.printError(Serial);
+}
+}
+});
+server.begin();
+}
+
+void loop(void) {
+server.handleClient();
+delay(1);
+
+//loop to blink without delay
+unsigned long currentMillis = millis();
+if (currentMillis - previousMillis &gt;= interval) {
+// save the last time you blinked the LED
+previousMillis = currentMillis;
+// if the LED is off turn it on and vice-versa:
+ledState = not(ledState);
+// set the LED with the ledState of the variable:
+digitalWrite(led,  ledState);
+}
+}
+</code></pre>
+
+			<p><strong>Important Note*</strong> "Remember to Keep the Updater Base Code Updated with Your Latest
+				Code, as Shown Above in the Blink Example."</p>
+
+			<!-- Preformatted Code -->
+			<br>
+			<h4>code: OTA SDcard Updater</h4>
+			<pre><code>
+#include &lt;SD.h&gt;
+#include &lt;Update.h&gt;
+
+const int SD_MISO = 2;
+const int SD_MOSI = 15;
+const int SD_SCLK = 14;
+const int SD_CS   = 13;
+const int LED_PIN = 12;
+
+bool sdcard = false;
+
+#define UPDATE_FILE "/update.bin"  // Path to the update file on the SD card
+
+void setup() {
+Serial.begin(115200);
+while (!Serial);
+
+pinMode(LED_PIN, OUTPUT);
+
+// Initialize SD card
+SPI.begin(SD_SCLK, SD_MISO, SD_MOSI, SD_CS);
+if (!SD.begin(SD_CS)) {
+Serial.println("SD card initialization failed!");
+}
+else{
+// Wait for SD card to be ready
+while (!SD.begin(SD_CS)) {
+Serial.println("SD card not ready");
+delay(1000);
+}
+sdcard = true;
+}
+}
+
+void loop() {
+// Check for serial command to trigger update
+if (Serial.available() &gt; 0 && sdcard == true) {
+String command = Serial.readStringUntil('\n');
+if (command == "getupdate") {
+performFirmwareUpdate();
+}
+}
+
+// Blink LED
+digitalWrite(LED_PIN, HIGH);
+delay(100);
+digitalWrite(LED_PIN, LOW);
+delay(500);
+}
+
+void performFirmwareUpdate() {
+// Check if update file exists
+if (!SD.exists(UPDATE_FILE)) {
+Serial.println("Update file not found!");
+return;
+}
+// Perform firmware update
+Serial.println("Performing firmware update...");
+
+File updateFile = SD.open(UPDATE_FILE);
+size_t updateSize = updateFile.size();
+
+if (Update.begin(updateSize)) {
+size_t written = Update.writeStream(updateFile);
+if (written == updateSize) {
+Serial.println("Update successful!");
+Update.end(); // End the update process
+updateFile.close(); // Close the update file
+Serial.println("Restarting ESP...");
+ESP.restart(); // Restart the ESP32
+} else {
+Serial.println("Update failed!");
+}
+Update.end();
+} else {
+Serial.println("Could not begin update!");
+}
+
+updateFile.close();
+}
+</code></pre>
+		</section>
+
+		<!-- Footer Section -->
+		<footer>
+			<!-- Copyright -->
+			<div>
+				<span>&copy;SquidMind. All rights reserved.</span>
+			</div>
+		</footer>
+	</div>
+
+</body>
+
+</html>

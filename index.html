@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>index</title>
+  <link rel="stylesheet" href="assets/css/index.css">
+</head>
+
+<body>
+  <div class="container">
+    <nav class="side-nav">
+
+      <button class="menu-toggle" aria-label="Toggle navigation">&#9776;</button>
+      <div class="avatar">
+        <img src="images/avatar.svg" alt="">
+      </div>
+
+      <ul class="nav-list box">
+        <li><a href="#" onclick="loadContent('pages/home.html#banners')">Home</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" onclick="toggleDropdown(event); loadContent('pages/home.html#portfolios')">Portfolio &#9662;</a>
+          <ul class="dropdown-menu">
+            <li><a href="#" onclick="loadContent('pages/portfolio/web.html')">Project Management</a></li>
+            <li><a href="#" onclick="loadContent('pages/portfolio/web.html')">Electronic Design & Embedded System</a></li>
+            <li><a href="#" onclick="loadContent('pages/portfolio/graphic.html')">Mechanical & Structural Design</a></li>
+            <li><a href="#" onclick="loadContent('pages/portfolio/photography.html')">Interface & Application Program</a></li>
+            <li><a class="spclk" href="#" onclick="loadContent('pages/portfolio/photography.html')">Life-2.0 [Farm]</a></li>
+          </ul>
+        </li>
+        <li><a href="#" onclick="loadContent('pages/home.html#abouts')">About</a></li>
+        <li><a href="#" onclick="loadContent('pages/home.html#contacts')">Contact</a></li>
+      </ul>
+
+    </nav>
+    
+    <div class="content">
+      <iframe id="content-iframe" src="pages/home.html" frameborder="0"></iframe>
+    </div>
+  </div>
+
+  <script src="assets/js/index.js"></script>
+</body>
+
+</html>

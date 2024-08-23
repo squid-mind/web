@@ -1,0 +1,297 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #252525;
+  color: #333;
+}
+
+.container {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0;
+  background: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 40px;
+  font-weight: bolder;
+  margin: 20px 0;
+}
+
+h2 {
+  text-align: center;
+  margin-top: 40px;
+  font-size: xx-large;
+}
+
+p {
+  font-size: 18px;
+  max-width: 1500px;
+  margin: 20px auto;
+  line-height: 1.6;
+}
+
+hr {
+  border: 0.5px solid white;
+  margin: 40px 0;
+}
+
+img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Banner Section */
+.banner {
+  position: relative;
+  background-color: #333;
+}
+
+.banner img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.banner .title {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 0.5s ease;
+}
+
+.banner .title img {
+  width: 100vmin;
+}
+
+/* Slideshow Styles */
+.slideshow-container {
+  max-width: 100%;
+  position: relative;
+  margin: auto;
+}
+
+.mySlides {
+  display: none;
+}
+
+.prev, .next {
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  padding: 16px;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  transition: 0.6s ease;
+  user-select: none;
+}
+
+.prev {
+  left: 0;
+  border-radius: 3px 0 0 3px;
+}
+
+.next {
+  right: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.prev:hover, .next:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.text {
+  color: #f2f2f2;
+  font-size: 15px;
+  padding: 8px 12px;
+  position: absolute;
+  bottom: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+.numbertext {
+  color: #f2f2f2;
+  font-size: 12px;
+  padding: 8px 12px;
+  position: absolute;
+  top: 0;
+}
+
+.dot {
+  cursor: pointer;
+  height: 15px;
+  width: 15px;
+  margin: 0 2px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+  transition: background-color 0.6s ease;
+}
+
+.active, .dot:hover {
+  background-color: #717171;
+}
+
+.fade {
+  animation-name: fade;
+  animation-duration: 1.5s;
+}
+
+@keyframes fade {
+  from { opacity: 0.4; }
+  to { opacity: 1; }
+}
+
+/* Portfolio Section */
+.portfolio {
+  padding: 50px;
+  background-color: #DEDEDE;
+}
+
+.portfolio-items {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.portfolio-item {
+  position: relative;
+  text-align: center;
+}
+
+.portfolio-item img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.portfolio-item p {
+  position: absolute;
+  width: 80%;
+  padding: 20px;
+  background-color: rgba(245, 245, 245, 0.9);
+  color: #333;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transition: 0.5s ease;
+}
+
+.portfolio-item .overlay {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+  background-color: whitesmoke;
+  border-radius: 10px;
+  transition: 0.5s ease;
+}
+
+.portfolio-item:hover .overlay {
+  opacity: 0.8;
+}
+
+.portfolio-item:hover p {
+  background-color: #252525;
+  color: whitesmoke;
+}
+
+/* About Section */
+.about {
+  padding: 50px;
+  background-color: #E6E6E6;
+}
+
+.about img {
+  width: 100%;
+  margin: 20px 0;
+}
+
+/* Contact Section */
+.contact {
+  padding: 50px;
+  background-color: #DDDDDD;
+}
+
+.contact form {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact label {
+  font-weight: bold;
+}
+
+.contact input,
+.contact textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.contact input[type="submit"] {
+  background-color: #333;
+  color: white;
+  border: none;
+  padding: 15px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.contact input[type="submit"]:hover {
+  background-color: #555;
+}
+
+/* Footer Section */
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #333;
+  color: white;
+}
+
+/* Preformatted Code Styles */
+pre {
+  background-color: #f4f4f4;
+  max-height: 800px;
+  padding: 10px;
+  border-radius: 5px;
+  overflow: auto;
+  color: #333;
+}
+/* Media Queries */
+
+/* Tablet styles */
+@media (min-width: 481px) and (max-width: 1024px) {
+  p {
+    font-size: 16px;
+  }
+
+  .portfolio-items {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 480px) {
+  p {
+    font-size: 14px;
+  }
+
+  .portfolio-items {
+    grid-template-columns: 1fr;
+  }
+}
