@@ -31,10 +31,12 @@ p {
   font-size: 18px;
   margin: 20px auto;
   line-height: 1.6;
+  text-align: justify;
 }
 
 hr {
-  border: 0.5px solid white;
+  border: 1px solid whitesmoke;
+  border-bottom-color: darkgrey;
   margin: 40px 0;
 }
 
@@ -48,6 +50,14 @@ img {
 .banner {
   position: relative;
   background-color: #333;
+  color: whitesmoke;
+}
+
+.banner p {
+  text-align: justify;
+  box-sizing: border-box;
+  background-color: #34495e;
+  padding: 10px 20px;
 }
 
 .banner img {
